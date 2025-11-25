@@ -1,0 +1,198 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============= USUARIOS =============
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders    Order[]
+  cartItems CartItem[]
+  
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// ============= CATEGORÍAS =============
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  products    Product[]
+  
+  @@map("categories")
+}
+
+// ============= PRODUCTOS =============
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  price       Int
+  discount    Int      @default(0)
+  categoryId  String
+  isNew       Boolean  @default(false)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  category     Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  sizes        ProductSize[]
+  images       ProductImage[]
+  colors       ProductColor[]
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+  
+  @@map("products")
+  @@index([categoryId])
+  @@index([slug])
+}
+
+// ============= TALLAS DE PRODUCTOS =============
+model ProductSize {
+  id        String   @id @default(cuid())
+  productId String
+  size      String
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([productId, size])
+  @@map("product_sizes")
+}
+
+// ============= IMÁGENES DE PRODUCTOS =============
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@map("product_images")
+  @@index([productId])
+}
+
+// ============= COLORES DE PRODUCTOS =============
+model ProductColor {
+  id        String   @id @default(cuid())
+  productId String
+  color     String
+  createdAt DateTime @default(now())
+  
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@map("product_colors")
+  @@index([productId])
+}
+
+// ============= CARRITO DE COMPRAS =============
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String?
+  sessionId String?
+  productId String
+  size      String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId, size])
+  @@map("cart_items")
+  @@index([sessionId])
+}
+
+// ============= ÓRDENES =============
+model Order {
+  id            String      @id @default(cuid())
+  userId        String
+  orderNumber   String      @unique
+  total         Int
+  subtotal      Int
+  shipping      Int         @default(0)
+  discount      Int         @default(0)
+  status        OrderStatus @default(PENDING)
+  
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  
+  shippingAddress String?
+  shippingCity    String?
+  shippingState   String?
+  shippingZip     String?
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  
+  @@map("orders")
+  @@index([userId])
+  @@index([orderNumber])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+// ============= ITEMS DE ORDEN =============
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  
+  productName  String
+  productImage String
+  size         String
+  quantity     Int
+  price        Int
+  discount     Int    @default(0)
+  subtotal     Int
+  
+  createdAt DateTime @default(now())
+  
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+  
+  @@map("order_items")
+  @@index([orderId])
+}
