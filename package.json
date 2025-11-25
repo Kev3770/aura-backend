@@ -1,16 +1,12 @@
 {
   "name": "aura-backend",
   "version": "1.0.0",
-  "description": "Backend API para Aura - Plataforma de Moda Masculina Premium",
+  "description": "Backend API para Aura",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "build": "prisma generate",
-    "db:push": "prisma db push",
-    "seed": "node prisma/seed.js"
-  },
-  "prisma": {
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
