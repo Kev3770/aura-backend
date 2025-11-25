@@ -6,30 +6,16 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "build": "npx prisma generate",
-    "db:generate": "prisma generate",
+    "build": "prisma generate",
     "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio",
-    "db:seed": "prisma db seed",
     "seed": "node prisma/seed.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
   },
-  "keywords": [
-    "ecommerce",
-    "fashion",
-    "api",
-    "rest",
-    "prisma",
-    "jwt",
-    "express"
-  ],
-  "author": "Kevin Peña - Aura Project",
-  "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
@@ -42,8 +28,7 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11",
-    "prisma": "^5.22.0"
+    "nodemon": "^3.1.11"
   },
   "engines": {
     "node": ">=18.0.0",
